@@ -20,13 +20,13 @@ using std::queue;
 
 // DO NOT MODIFY ANY LINE ABOVE OR ADD EXTRA INCLUDES
 
-/*! 
- *  \brief     DM2126 Assignment 2
- *  \details   Submit the whole solution, but only this file will be used to grade
- *  \author    <John Doe>
- *  \date      2015 
- *  \note      <Admin ID>
- */
+/*!
+*  \brief     DM2126 Assignment 2
+*  \details   Submit the whole solution, but only this file will be used to grade
+*  \author    <Lim Zi Sheng>
+*  \date      24 / 01 / 2017
+*  \note      <160397M>
+*/
 
 //*******************************************************************//
 // Linked list stuff
@@ -232,26 +232,73 @@ size_t LinkedList::size()
 //*******************************************************************//
 // Queue stuff
 //*******************************************************************//
-Queue::Queue() 
+Queue::Queue()
 {
+	front_ = back_ = NULL;
 }
 
 Queue::~Queue()
-{   
+{
+	Node *delPtr = front_;
+
+	while (front_)
+	{
+		front_ = front_->next;
+		delete delPtr;
+		delPtr = front_;
+	}
+
+	back_ = front_ = NULL;
 }
 
 void Queue::enqueue(int data)
-{   
+{
+	if (!front_)
+	{
+		front_ = new Node;
+		front_->data = data;
+		back_ = front_;
+	}
+	else
+	{
+		back_->next = new Node;
+		back_->next->data = data;
+		back_ = back_->next;
+	}
 }
 
 int Queue::dequeue()
 {
-    return 0;
+	if (!front_)
+		return 0;
+
+	Node *delPtr = NULL;
+
+	delPtr = front_;
+	front_ = delPtr->next;
+	int tempData = delPtr->data;
+	delete delPtr;
+	return tempData;
 }
 
 size_t Queue::size()
 {
-    return 0;
+	int indexCount = 0;
+	if (!front_)
+		return 0;
+
+	back_ = front_;
+
+	while (back_)
+	{
+		indexCount++;
+		if (back_->next)
+			back_ = back_->next;
+		else
+			break;
+	}
+
+	return indexCount;
 }
 
 //*******************************************************************//
@@ -259,25 +306,73 @@ size_t Queue::size()
 //*******************************************************************//
 Stack::Stack()
 {
-
+	top_ = NULL;
 }
 
 Stack::~Stack()
 {
+	Node *delPtr = top_;
+
+	while (delPtr)
+	{
+		top_ = top_->next;
+		delete delPtr;
+		delPtr = top_;
+	}
+
+	top_ = NULL;
 }
 
 void Stack::push(int data)
 {
+	if (!top_)
+	{
+		top_ = new Node;
+		top_->data = data;
+	}
+	else
+	{
+		Node *temp = new Node;
+		temp->data = data;
+
+		temp->next = top_;
+		top_ = temp;
+	}
 }
 
 int Stack::pop()
 {
-    return 0;
+	if (!top_)
+		return 0;
+
+	Node *delPtr = top_;
+	top_ = delPtr->next;
+	int tempData = delPtr->data;
+	delete delPtr;
+	return tempData;
 }
 
 size_t Stack::size()
 {
-    return 0;
+	if (!top_)
+		return 0;
+
+	Node* temp;
+	temp = top_;
+
+	int indexCount = 0;
+
+	while (temp)
+	{
+		indexCount++;
+
+		if (temp->next)
+			temp = temp->next;
+		else
+			break;
+	}
+
+	return indexCount;
 }
 
 
