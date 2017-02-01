@@ -31,44 +31,202 @@ using std::queue;
 //*******************************************************************//
 // Linked list stuff
 //*******************************************************************//
-LinkedList::LinkedList() 
+LinkedList::LinkedList()
 {
+	head_ = NULL;
 }
 
 LinkedList::~LinkedList()
-{ 
+{
+	Node *delPtr = head_;
+
+	while (delPtr)
+	{
+		head_ = head_->next;
+		delete delPtr;
+
+		delPtr = head_;
+	}
+
+	head_ = NULL;
 }
 
 void LinkedList::push_front(int data)
 {
+	if (!head_)
+	{
+		head_ = new Node;
+		head_->data = data;
+	}
+	else
+	{
+		Node* newData = new Node;
+		newData->data = data;
+		newData->next = head_;
+		head_ = newData;
+
+		newData = 0;
+		delete newData;
+	}
 }
 
 void LinkedList::push_back(int data)
 {
+	Node* curr;
+	curr = head_;
+
+	if (!head_)
+	{
+		head_ = new Node;
+		head_->data = data;
+	}
+	else
+	{
+		while (curr->next)
+		{
+			curr = curr->next;
+		}
+		curr->next = new Node;
+		curr->next->data = data;
+	}
 }
 
 int LinkedList::pop_front()
 {
-    return 0;
+	Node* curr;
+	curr = head_;
+
+	if (!head_)
+	{
+		return 0;
+	}
+
+	head_ = head_->next;
+	curr->next = 0;
+
+	return curr->data;
 }
 
 int LinkedList::pop_back()
-{    
-    return 0;
+{
+	if (!head_)
+		return 0;
+
+	Node *delPtr = head_;
+	Node *prev = delPtr;
+
+	while (delPtr->next)
+	{
+		prev = delPtr;
+		delPtr = delPtr->next;
+	}
+
+	prev->next = NULL;
+	return delPtr->data;
+	delete delPtr;
 }
 
 void LinkedList::insert_at(int pos, int data)
-{    
+{
+	if (pos <= 0)
+	{
+		pos = 0;
+		push_front(data);
+		return;
+	}
+
+	int tempIdx = 0;
+	Node* curr;
+	Node* prev;
+	Node* newData = new Node;
+
+	newData->data = data;
+	prev = head_;
+	curr = head_;
+
+	if (!head_)
+	{
+		head_ = newData;
+		return;
+	}
+
+	while (tempIdx < pos)
+	{
+		if (curr->next)
+		{
+			tempIdx++;
+			prev = curr;
+			curr = curr->next;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	newData->next = curr;
+	prev->next = newData;
+
+	newData = 0;
+	newData->next = 0;
+	delete newData;
 }
 
 int LinkedList::pop_at(int pos)
 {
-    return 0;
+	if (!head_)
+		return 0;
+
+	if (pos <= 0)
+	{
+		pos = 0;
+		return pop_front();
+	}
+
+	int tempIdx = 0;
+	Node* curr;
+	Node* prev;
+
+	prev = head_;
+	curr = head_;
+
+	while (tempIdx < pos)
+	{
+		if (curr->next)
+		{
+			tempIdx++;
+			prev = curr;
+			curr = curr->next;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	prev->next = curr->next;
+	curr->next = 0;
+
+	int tempData;
+	tempData = curr->data;
+	delete curr;
+	return tempData;
 }
 
 size_t LinkedList::size()
 {
-    return 0;
+	size_t countSize;
+	countSize = 0;
+	Node* curr;
+	curr = head_;
+
+	while (curr->next)
+	{
+		countSize++;
+		curr = curr->next;
+	}
+
+	return countSize;
 }
 
 //*******************************************************************//
