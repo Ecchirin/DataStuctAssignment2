@@ -64,9 +64,6 @@ void LinkedList::push_front(int data)
 		newData->data = data;
 		newData->next = head_;
 		head_ = newData;
-
-		newData = 0;
-		delete newData;
 	}
 }
 
@@ -93,18 +90,26 @@ void LinkedList::push_back(int data)
 
 int LinkedList::pop_front()
 {
+	if (!head_)
+		return 0;
+
 	Node* curr;
 	curr = head_;
 
-	if (!head_)
+	if (head_->next)
+		head_ = head_->next;
+	else
 	{
-		return 0;
+		int tempData = head_->data;
+		delete head_;
+		head_ = NULL;
+		return tempData;
 	}
+	int tempData = curr->data;
 
-	head_ = head_->next;
 	curr->next = 0;
-
-	return curr->data;
+	delete curr;
+	return tempData;
 }
 
 int LinkedList::pop_back()
@@ -122,54 +127,37 @@ int LinkedList::pop_back()
 	}
 
 	prev->next = NULL;
-	return delPtr->data;
+	int temp = delPtr->data;
+	if (delPtr == head_)
+		head_ = NULL;
 	delete delPtr;
+	return temp;
 }
 
 void LinkedList::insert_at(int pos, int data)
 {
-	if (pos <= 0)
+	if (!head_ || pos <= 0)
 	{
-		pos = 0;
 		push_front(data);
 		return;
 	}
 
-	int tempIdx = 0;
-	Node* curr;
-	Node* prev;
-	Node* newData = new Node;
-
+	Node *newData = new Node;
 	newData->data = data;
-	prev = head_;
-	curr = head_;
 
-	if (!head_)
-	{
-		head_ = newData;
-		return;
-	}
+	Node* curr = head_;
+	Node* prev = head_;
+	int tempIdx = 0;
 
-	while (tempIdx < pos)
+	while (curr && (tempIdx != pos))
 	{
-		if (curr->next)
-		{
-			tempIdx++;
-			prev = curr;
-			curr = curr->next;
-		}
-		else
-		{
-			break;
-		}
+		prev = curr;
+		curr = curr->next;
+		tempIdx++;
 	}
 
 	newData->next = curr;
 	prev->next = newData;
-
-	newData = 0;
-	newData->next = 0;
-	delete newData;
 }
 
 int LinkedList::pop_at(int pos)
@@ -179,7 +167,6 @@ int LinkedList::pop_at(int pos)
 
 	if (pos <= 0)
 	{
-		pos = 0;
 		return pop_front();
 	}
 
@@ -194,17 +181,21 @@ int LinkedList::pop_at(int pos)
 	{
 		if (curr->next)
 		{
-			tempIdx++;
 			prev = curr;
 			curr = curr->next;
+			tempIdx++;
 		}
 		else
 		{
-			break;
+			return 0;
 		}
 	}
 
-	prev->next = curr->next;
+	if (curr->next)
+		prev->next = curr->next;
+	else
+		prev->next = 0;
+
 	curr->next = 0;
 
 	int tempData;
@@ -215,15 +206,21 @@ int LinkedList::pop_at(int pos)
 
 size_t LinkedList::size()
 {
+	if (!head_)
+		return 0;
+
 	size_t countSize;
 	countSize = 0;
 	Node* curr;
 	curr = head_;
 
-	while (curr->next)
+	while (curr)
 	{
 		countSize++;
-		curr = curr->next;
+		if (curr->next)
+			curr = curr->next;
+		else
+			break;
 	}
 
 	return countSize;
@@ -272,10 +269,19 @@ int Queue::dequeue()
 	if (!front_)
 		return 0;
 
-	Node *delPtr = NULL;
+	Node *delPtr = front_;
 
-	delPtr = front_;
-	front_ = delPtr->next;
+	if (front_->next)
+		front_ = delPtr->next;
+	else
+	{
+		int tempData = front_->data;
+		delete front_;
+		front_ = NULL;
+		back_ = NULL;
+		return tempData;
+	}
+
 	int tempData = delPtr->data;
 	delete delPtr;
 	return tempData;
@@ -283,19 +289,16 @@ int Queue::dequeue()
 
 size_t Queue::size()
 {
-	int indexCount = 0;
 	if (!front_)
 		return 0;
 
-	back_ = front_;
+	size_t indexCount = 0;
+	Node *tempPtr = front_;
 
-	while (back_)
+	while (tempPtr)
 	{
 		indexCount++;
-		if (back_->next)
-			back_ = back_->next;
-		else
-			break;
+		tempPtr = tempPtr->next;
 	}
 
 	return indexCount;
@@ -380,10 +383,77 @@ size_t Stack::size()
 // Balanced parenthesis
 bool Brackets(const string& input)
 {
-    return true;
+	Stack myStack;
+	char temp;
+
+	for (unsigned int i = 0; i < input.length(); i++)
+	{
+		if ((input[i] == '(') || (input[i] == '[') || (input[i] == '{') || (input[i] == '<'))
+		{
+			myStack.push(input[i]);
+		}
+		else
+		{
+			switch (input[i])
+			{
+			case ')':
+				temp = myStack.pop();
+				if ((temp == '[') || (temp == '{') || (temp == '<'))
+				{
+					return false;
+				}
+				break;
+			case ']':
+				temp = myStack.pop();
+				if ((temp == '(') || (temp == '{') || (temp == '<'))
+				{
+					return false;
+				}
+				break;
+			case '}':
+				temp = myStack.pop();
+				if ((temp == '[') || (temp == '(') || (temp == '<'))
+				{
+					return false;
+				}
+				break;
+			case '>':
+				temp = myStack.pop();
+				if ((temp == '[') || (temp == '{') || (temp == '('))
+				{
+					return false;
+				}
+				break;
+			}
+		}
+	}
+
+	if (myStack.pop() == 0)
+	{
+		return true;
+	}
+	else
+		return false;
 }
 
 // Query machine, hits
 void QueryMachine(vector<int>& data, vector<int>& queries, vector<unsigned int>& results)
 {
+	map<int, int> myMap;
+
+	for (int &i : queries)
+	{
+		myMap[i] = 0;
+	}
+	for (int &i : data)
+	{
+		if (myMap.find(i) != myMap.end())
+			myMap[i]++;
+	}
+	for (int &i : queries)
+	{
+		if (myMap.find(i) != myMap.end())
+			results.push_back(myMap[i]);
+	}
+
 }
